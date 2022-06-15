@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vald-tensorflow-ingress-filter
+  labels:
+    app: vald-tensorflow-ingress-filter
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vald-tensorflow-ingress-filter
+  template:
+    metadata:
+      labels:
+        app: vald-tensorflow-ingress-filter
+    spec:
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+        runAsNonRoot: true
+        fsGroup: 65532
+      initContainers:
+        - name: model-downloader
+          image: curlimages/curl
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /model
+              name: model-volume
+          command:
+            - /bin/sh
+            - -e
+            - -c
+            - |
+              curl -L "https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/4?tf-hub-format=compressed" -o /model/sample.tar.gz  #FIXME
+              tar -zxvf /model/sample.tar.gz -C /model  #FIXME
+      containers:
+        - name: vald-tensorflow-ingress-filter
+          image: vdaas/vald-tensorflow-ingress-filter
+          imagePullPolicy: Always
+          env:
+            - name: MODEL_PATH
+              value: "/model"  #FIXME
+            - name: INPUT_TENSOR_NAMES
+              value: "name1 name2"  #FIXME
+            - name: OUTPUT_TENSOR_NAME
+              value: "name"  #FIXME
+            - name: REQUEST_TYPE
+              value: "int32"  #FIXME
+          ports:
+            - name: grpc
+              containerPort: 8081
+          volumeMounts:
+            - mountPath: /model
+              name: model-volume
+      volumes:
+        - name: model-volume
+          emptyDir: {}
