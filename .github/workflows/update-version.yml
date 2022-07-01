@@ -1,0 +1,59 @@
+#
+# Copyright (C) 2019-2022 vdaas.org vald team <vald@vdaas.org>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: "Update version"
+on:
+  schedule:
+    - cron: 0 * * * *
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Run auto-semver
+        run: |
+          CURRENT_VERSION=`cat VALD_TENSORFLOW_INGRESS_FILTER_VERSION`
+
+          VERSION=`curl -s https://raw.githubusercontent.com/vdaas/vald-client-python/master/VALD_CLIENT_PYTHON_VERSION`
+          VERSION="v${VERSION}"
+          if [ "$CURRENT_VERSION" = "${VERSION}" ]; then
+            echo "not updated"
+            exit 0
+          fi
+
+          VERSION=`curl -sL "https://pypi.org/pypi/vald-client-python/json" | jq -r '.info.version'`
+          VERSION="v${VERSION}"
+          if [ "$CURRENT_VERSION" = "${VERSION}" ]; then
+            echo "not uploaded to pypi"
+            exit 0
+          fi
+
+          git remote set-url origin "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          echo "${VERSION}" > VALD_TENSORFLOW_INGRESS_FILTER_VERSION
+          git checkout main
+          git config --global user.name "VDaaS org"
+          git config --global user.email "ci@vdaas.org"
+          git add VALD_TENSORLOW_INGRESS_FILTER_VERSION
+          git commit --signoff -m ":bookmark: Release ${VERSION}"
+          git tag ${VERSION}
+          git push origin main
+          git push origin ${VERSION}
+        env:
+          GITHUB_USER: ${{ secrets.VALDCLI_USER }}
+          GITHUB_TOKEN: ${{ secrets.VALDCLI_TOKEN }}
