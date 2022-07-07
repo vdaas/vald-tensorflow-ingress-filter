@@ -30,7 +30,7 @@ version:
 
 .PHONY: docker/platforms
 docker/platforms:
-	@echo "linux/amd64,linux/arm64"
+	@echo "linux/amd64"
 
 .PHONY: docker/name/tensorflow-ingress-filter
 docker/name/tensorflow-ingress-filter:

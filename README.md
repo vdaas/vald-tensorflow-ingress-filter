@@ -1,5 +1,8 @@
 # vald-tensorflow-ingress-filter
 
+[![Snyk](https://img.shields.io/snyk/vulnerabilities/github/vdaas/vald-tensorflow-ingress-filter)](https://snyk.io/test/github/vdaas/vald-tensorflow-ingress-filter)
+[![docker image](https://img.shields.io/docker/pulls/vdaas/vald-tensorflow-ingress-filter?label=vdaas%2Fvald-tensorflow-ingress-filter&logo=docker&style=flat-square)](https://hub.docker.com/r/vdaas/vald-tensorflow-ingress-filter)
+
 vald-tensorflow-ingress-filter is one of the official ingress filter components provided by Vald.
 
 Its custom logic requires the input of the Tensorflow SavedModel as a request and outputs the result from the Tensorflow SavedModel as the request of the Vald Agent.
@@ -14,6 +17,8 @@ Using this component lets users vectorize various data such as text and images u
 git clone https://github.com/vdaas/vald-tensorflow-ingress-filter.git
 kubectl apply -f vald-tensorflow-ingress-filter/k8s
 ```
+
+The official image only supports amd64.
 
 NOTE: The example manifest files use BERT from [Tensorflow Hub](https://www.tensorflow.org/hub) as the Tensorflow SavedModel. You can change the model by editing k8s/deployment.yaml.
 
