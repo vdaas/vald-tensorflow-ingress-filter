@@ -30,7 +30,7 @@ jobs:
         run: |
           CURRENT_VERSION=`cat VALD_TENSORFLOW_INGRESS_FILTER_VERSION`
 
-          VERSION=`curl -s https://raw.githubusercontent.com/vdaas/vald-client-python/master/VALD_CLIENT_PYTHON_VERSION`
+          VERSION=`curl -s https://raw.githubusercontent.com/vdaas/vald-client-python/main/VALD_CLIENT_PYTHON_VERSION`
           VERSION="v${VERSION}"
           if [ "$CURRENT_VERSION" = "${VERSION}" ]; then
             echo "not updated"
