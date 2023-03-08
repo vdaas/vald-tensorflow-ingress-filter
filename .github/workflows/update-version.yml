@@ -38,6 +38,11 @@ jobs:
           fi
 
           VERSION=`curl -sL "https://pypi.org/pypi/vald-client-python/json" | jq -r '.info.version'`
+          if [ "" = "${VERSION}" ]; then
+            echo "the version is empty"
+            exit 0
+          fi
+
           VERSION="v${VERSION}"
           if [ "$CURRENT_VERSION" = "${VERSION}" ]; then
             echo "not uploaded to pypi"
