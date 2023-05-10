@@ -9,7 +9,7 @@ Its custom logic requires the input of the Tensorflow SavedModel as a request an
 Using this component lets users vectorize various data such as text and images using the Tensorflow SavedModel only inside the Vald cluster without external APIs.
 
 <div align="center">
-    <img src="https://github.com/vdaas/vald/blob/main/assets/image/readme.svg" width="50%" />
+    <img src="https://github.com/vdaas/vald/blob/main/assets/image/readme.svg?raw=true" width="50%" />
 </div>
 
 [![latest Image](https://img.shields.io/docker/v/vdaas/vald-tensorflow-ingress-filter/latest?label=vald-tensorflow-ingress-filter)](https://hub.docker.com/r/vdaas/vald-tensorflow-ingress-filter/tags?page=1&name=latest)
@@ -21,12 +21,8 @@ Using this component lets users vectorize various data such as text and images u
 
 <!-- FIXME: If image has some requirements, describe here with :warning: emoji -->
 
-<details><summary>linux/amd64</summary><br>
-
 - Libraries: kubectl, Helm, grpcio, numpy, tensorflow, vald-client-python
 - Others: Vald cluster
-
-</details>
 
 ## Get Started
 
@@ -129,12 +125,11 @@ stub.InsertObject(req)
 
 ## Versions
 
-| tag     |    linux/amd64     | linux/arm64 | description                                                                                                                 |
-| :------ | :----------------: | :---------: | :-------------------------------------------------------------------------------------------------------------------------- |
-| latest  | :white_check_mark: |     :x:     | the latest image is the same as the latest version of [vdaas/vald](https://github.com/vdaas/vald) repository version.       |
-| nightly | :white_check_mark: |     :x:     | the nightly applies the main branch's source code of the [vdaas/vald](https://github.com/vdaas/vald) repository.            |
-| vX.Y.Z  | :white_check_mark: |     :x:     | the vX.Y.Z image applies the source code of the [vdaas/vald](https://github.com/vdaas/vald) repository.                     |
-| pr-XXX  | :white_check_mark: |     :x:     | the pr-X image applies the source code of the pull request X of the [vdaas/vald](https://github.com/vdaas/vald) repository. |
+| tag     | linux/amd64 | linux/arm64 | description                                                                                                                     |
+| :------ | :---------: | :---------: | :------------------------------------------------------------------------------------------------------------------------------ |
+| latest  |     ✅      |     ❌      | the latest image is the same as the latest version of [vdaas/vald](https://github.com/vdaas/vald) repository version.           |
+| nightly |     ✅      |     ❌      | the nightly applies the main branch's source code of the [vdaas/vald](https://github.com/vdaas/vald) repository.                |
+| pr-XXX  |     ✅      |     ❌      | the pr-XXX image applies the source code of the pull request XXX of the [vdaas/vald](https://github.com/vdaas/vald) repository. |
 
 ## Dockerfile
 
