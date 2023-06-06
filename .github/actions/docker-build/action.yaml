@@ -60,6 +60,11 @@ runs:
         elif [ "${{ github.event_name }}" = "pull_request" ]; then
           pr_num=`cat $GITHUB_EVENT_PATH | jq -r ".number"`
           primary_tag="pr-${pr_num}"
+        elif [ "${{ github.event_name }}" = "pull_request_target" ]; then
+          pr_num=`cat $GITHUB_EVENT_PATH | jq -r ".number"`
+          primary_tag="pr-${pr_num}"
+        elif [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
+          primary_tag="${{ github.ref_name }}"
         else
           primary_tag="unknown"
         fi
