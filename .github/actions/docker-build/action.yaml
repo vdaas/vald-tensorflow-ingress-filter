@@ -55,16 +55,20 @@ runs:
       shell: bash
       id: determine_tag_name
       run: |
-        if [ "$GITHUB_REF" = "refs/heads/main" ]; then
-          primary_tag="latest"
+        echo "GITHUB_REF $GITHUB_REF"
+        echo "GITHUB_EVENT_PATH $GITHUB_EVENT_PATH"
+        echo "GITHUB_EVENT_NAME ${{ github.event_name }}"
+        echo "GITHUB_EVENT_NUMBER  ${{ github.event.number }}"
+        if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
+          primary_tag="${{ github.ref_name }}"
         elif [ "${{ github.event_name }}" = "pull_request" ]; then
           pr_num=`cat $GITHUB_EVENT_PATH | jq -r ".number"`
           primary_tag="pr-${pr_num}"
         elif [ "${{ github.event_name }}" = "pull_request_target" ]; then
           pr_num=`cat $GITHUB_EVENT_PATH | jq -r ".number"`
           primary_tag="pr-${pr_num}"
-        elif [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
-          primary_tag="${{ github.ref_name }}"
+        elif [ "$GITHUB_REF" = "refs/heads/main" ]; then
+          primary_tag="latest"
         else
           primary_tag="unknown"
         fi
