@@ -33,9 +33,6 @@ outputs:
   IMAGE_NAME:
     description: "image name"
     value: ${{ steps.image_name.outputs.IMAGE_NAME }}
-  ALTER_IMAGE_NAME:
-    description: "alter image name"
-    value: ${{ steps.image_name.outputs.ALTER_IMAGE_NAME }}
   PRIMARY_TAG:
     description: "primary tag"
     value: ${{ steps.determine_tag_name.outputs.PRIMARY_TAG }}
@@ -53,12 +50,8 @@ runs:
       id: image_name
       run: |
         image_name=`make docker/name/${TARGET}`
-        alter_org=`make docker/name/org/alter`
-        alter_image_name=`make ORG="${alter_org}" docker/name/${TARGET}`
         echo "IMAGE_NAME is: ${image_name}"
-        echo "ALTER_IMAGE_NAME is: ${alter_image_name}"
         echo "IMAGE_NAME=${image_name}" >> $GITHUB_OUTPUT
-        echo "ALTER_IMAGE_NAME=${alter_image_name}" >> $GITHUB_OUTPUT
       env:
         TARGET: ${{ inputs.target }}
     - name: Determine tag name
@@ -111,16 +104,14 @@ runs:
       shell: bash
       id: add_extra_tags
       run: |
-        extra_tags="-t ${ALTER_IMAGE_NAME}:${PRIMARY_TAG}"
+        extra_tags=""
         if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
-          latest_tags="-t ${IMAGE_NAME}:latest -t ${ALTER_IMAGE_NAME}:latest"
-          extra_tags="${extra_tags} ${latest_tags}"
+          extra_tags="-t ${IMAGE_NAME}:latest"
         fi
         echo "EXTRA_TAGS is determined: ${extra_tags}"
         echo "EXTRA_TAGS=${extra_tags}" >> $GITHUB_OUTPUT
       env:
         IMAGE_NAME: ${{ steps.image_name.outputs.IMAGE_NAME }}
-        ALTER_IMAGE_NAME: ${{ steps.image_name.outputs.ALTER_IMAGE_NAME }}
         PRIMARY_TAG: ${{ steps.determine_tag_name.outputs.PRIMARY_TAG }}
     - name: Build and Push
       shell: bash
