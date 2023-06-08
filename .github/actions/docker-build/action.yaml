@@ -39,6 +39,9 @@ outputs:
   PLATFORMS:
     description: "target platforms"
     value: ${{ steps.determine_platforms.outputs.PLATFORMS }}
+  EXTRA_TAGS:
+    description: "extra tags"
+    value: ${{ steps.add_extra_tags.outputs.EXTRA_TAGS }}
 runs:
   using: "composite"
   steps:
@@ -55,16 +58,24 @@ runs:
       shell: bash
       id: determine_tag_name
       run: |
-        if [ "$GITHUB_REF" = "refs/heads/main" ]; then
-          primary_tag="latest"
+        echo "GITHUB_REF $GITHUB_REF"
+        echo "GITHUB_EVENT_PATH $GITHUB_EVENT_PATH"
+        echo "GITHUB_EVENT_NAME ${{ github.event_name }}"
+        echo "GITHUB_EVENT_NUMBER  ${{ github.event.number }}"
+        if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
+          tag_name=`echo $GITHUB_REF | sed -e 's:^refs/tags/::'`
+          primary_tag="${tag_name}"
         elif [ "${{ github.event_name }}" = "pull_request" ]; then
           pr_num=`cat $GITHUB_EVENT_PATH | jq -r ".number"`
+          echo "PR-${pr_num}" > VALD_TENSORFLOW_INGRESS_FILTER_VERSION
           primary_tag="pr-${pr_num}"
         elif [ "${{ github.event_name }}" = "pull_request_target" ]; then
           pr_num=`cat $GITHUB_EVENT_PATH | jq -r ".number"`
+          echo "PR-${pr_num}" > VALD_TENSORFLOW_INGRESS_FILTER_VERSION
           primary_tag="pr-${pr_num}"
-        elif [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
-          primary_tag="${{ github.ref_name }}"
+        elif [ "$GITHUB_REF" = "refs/heads/main" ]; then
+          echo "nightly" > VALD_TENSORFLOW_INGRESS_FILTER_VERSION
+          primary_tag="nightly"
         else
           primary_tag="unknown"
         fi
@@ -77,6 +88,8 @@ runs:
         if [ "${TARGET_PLATFORMS}" = "" ]; then
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             platforms="linux/amd64"
+          elif [ "${{ github.event_name }}" = "pull_request_target" ]; then
+            platforms="linux/amd64"
           else
             platforms=`make docker/platforms`
           fi
@@ -87,17 +100,19 @@ runs:
         echo "PLATFORMS=${platforms}" >> $GITHUB_OUTPUT
       env:
         TARGET_PLATFORMS: ${{ inputs.platforms }}
-    - name: Add version tag
+    - name: Add extra tags
       shell: bash
-      id: add_version_tag
+      id: add_extra_tags
       run: |
-        if [ "$GITHUB_REF" = "refs/tags/.*" ]; then
-          extra_tags="-t `make docker/name/tag/version`"
-        else
-          extra_tags=""
+        extra_tags=""
+        if [[ "$GITHUB_REF" =~ ^refs/tags/.* ]]; then
+          extra_tags="-t ${IMAGE_NAME}:latest"
         fi
         echo "EXTRA_TAGS is determined: ${extra_tags}"
         echo "EXTRA_TAGS=${extra_tags}" >> $GITHUB_OUTPUT
+      env:
+        IMAGE_NAME: ${{ steps.image_name.outputs.IMAGE_NAME }}
+        PRIMARY_TAG: ${{ steps.determine_tag_name.outputs.PRIMARY_TAG }}
     - name: Build and Push
       shell: bash
       id: build_and_push
@@ -113,4 +128,5 @@ runs:
         PLATFORMS: ${{ steps.determine_platforms.outputs.PLATFORMS }}
         BUILDER: ${{ inputs.builder }}
         LABEL_OPTS: "--label org.opencontainers.image.url=${{ github.event.repository.html_url }} --label org.opencontainers.image.source=${{ github.event.repository.html_url }} --label org.opencontainers.image.revision=${{ github.sha }}"
+        EXTRA_TAGS: ${{ steps.add_extra_tags.outputs.EXTRA_TAGS }}
         PRIMARY_TAG: ${{ steps.determine_tag_name.outputs.PRIMARY_TAG }}
