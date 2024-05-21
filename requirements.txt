@@ -2,3 +2,4 @@ grpcio
 numpy
 tensorflow
 vald-client-python
+requests>=2.32.0 # not directly required, pinned by Snyk to avoid a vulnerability
